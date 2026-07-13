@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疑問轉譯訓練場｜生活疑問 → 研究問題（50題）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#23405C;        /* 墨青：主色 */
+  --ink-deep:#16293D;   /* 深墨 */
+  --paper:#F2F4F6;      /* 冷調紙灰 */
+  --card:#FFFFFF;
+  --seal:#A63D2F;       /* 印章朱紅：分類戳記 */
+  --ok:#2F7D5B;         /* 竹綠：正確 */
+  --ok-bg:#EAF4EF;
+  --no:#B04434;         /* 磚紅：錯誤 */
+  --no-bg:#F9EEEB;
+  --gray:#6B7480;
+  --line:#D8DEE4;
+  --radius:14px;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC","PingFang TC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:var(--sans);
+  background:var(--paper);
+  color:var(--ink-deep);
+  line-height:1.7;
+  min-height:100vh;
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 80px;}
+
+/* ---------- Header ---------- */
+header{margin-bottom:22px;}
+.kicker{
+  font-size:.8rem;letter-spacing:.35em;color:var(--seal);
+  font-weight:700;margin-bottom:6px;
+}
+h1{
+  font-family:var(--serif);font-weight:900;font-size:1.7rem;
+  color:var(--ink-deep);letter-spacing:.04em;
+}
+.subtitle{color:var(--gray);font-size:.92rem;margin-top:6px;}
+.progress-shell{
+  margin-top:16px;background:#E1E7EC;border-radius:99px;height:10px;overflow:hidden;
+}
+.progress-bar{
+  height:100%;width:0%;background:linear-gradient(90deg,var(--ink),#4A76A8);
+  border-radius:99px;transition:width .35s ease;
+}
+.progress-meta{
+  display:flex;justify-content:space-between;font-size:.82rem;color:var(--gray);margin-top:6px;
+}
+
+/* ---------- 起始畫面 ---------- */
+.intro-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:30px 28px;
+}
+.intro-card h2{font-family:var(--serif);font-size:1.2rem;margin-bottom:12px;color:var(--ink);}
+.intro-card p{margin-bottom:12px;font-size:.95rem;}
+.criteria{
+  background:#F6F8FA;border-left:4px solid var(--ink);border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:16px 0;font-size:.92rem;
+}
+.criteria strong{color:var(--ink);}
+.trap{
+  background:var(--no-bg);border-left:4px solid var(--no);border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:16px 0;font-size:.92rem;
+}
+.trap strong{color:var(--no);}
+.cat-legend{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
+.cat-chip{
+  font-size:.8rem;padding:3px 12px;border-radius:99px;
+  border:1px solid var(--line);color:var(--gray);background:#fff;
+}
+
+/* ---------- 題卡 ---------- */
+.q-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 26px 22px;box-shadow:0 2px 10px rgba(35,64,92,.05);
+}
+.q-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.seal-stamp{
+  flex:none;width:44px;height:44px;border:2px solid var(--seal);border-radius:8px;
+  color:var(--seal);font-family:var(--serif);font-weight:900;font-size:1.25rem;
+  display:flex;align-items:center;justify-content:center;
+  transform:rotate(-4deg);
+}
+.q-label{font-size:.78rem;letter-spacing:.25em;color:var(--gray);font-weight:700;}
+.life-q{
+  font-family:var(--serif);font-weight:700;font-size:1.18rem;color:var(--ink-deep);
+  margin-top:2px;
+}
+.translate-hint{
+  display:flex;align-items:center;gap:10px;margin:16px 0 14px;
+  color:var(--ink);font-size:.86rem;font-weight:700;letter-spacing:.08em;
+}
+.translate-hint::before,.translate-hint::after{
+  content:"";flex:1;height:1px;background:var(--line);
+}
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt{
+  text-align:left;font-family:var(--sans);font-size:.95rem;line-height:1.65;
+  background:#FBFCFD;border:1.5px solid var(--line);border-radius:10px;
+  padding:13px 16px 13px 46px;position:relative;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .1s;
+  color:var(--ink-deep);width:100%;
+}
+.opt .tag{
+  position:absolute;left:14px;top:13px;font-weight:900;color:var(--ink);
+  font-family:var(--serif);
+}
+.opt:hover:not(:disabled){border-color:var(--ink);background:#F3F7FB;}
+.opt:focus-visible{outline:3px solid #4A76A8;outline-offset:2px;}
+.opt:disabled{cursor:default;}
+.opt.correct{border-color:var(--ok);background:var(--ok-bg);}
+.opt.correct .tag{color:var(--ok);}
+.opt.wrong{border-color:var(--no);background:var(--no-bg);}
+.opt.wrong .tag{color:var(--no);}
+.opt.dim{opacity:.55;}
+
+/* ---------- 解析 ---------- */
+.feedback{
+  margin-top:16px;border-radius:10px;padding:16px 18px;font-size:.9rem;display:none;
+}
+.feedback.show{display:block;animation:fadeUp .3s ease;}
+.feedback.good{background:var(--ok-bg);border:1px solid #BFDCCE;}
+.feedback.bad{background:var(--no-bg);border:1px solid #E4C4BC;}
+.feedback .verdict{font-weight:900;font-size:1rem;margin-bottom:8px;}
+.feedback.good .verdict{color:var(--ok);}
+.feedback.bad .verdict{color:var(--no);}
+.feedback .why{margin-bottom:6px;}
+.feedback .why b{color:var(--ink);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ---------- 按鈕 ---------- */
+.btn{
+  font-family:var(--sans);font-weight:700;font-size:.95rem;letter-spacing:.06em;
+  background:var(--ink);color:#fff;border:none;border-radius:10px;
+  padding:12px 32px;cursor:pointer;transition:background .15s,transform .1s;
+}
+.btn:hover{background:var(--ink-deep);}
+.btn:active{transform:scale(.98);}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--ink);}
+.btn-row{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;}
+
+/* ---------- 結果 ---------- */
+.result-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:32px 28px;text-align:center;
+}
+.score-ring{
+  width:150px;height:150px;margin:6px auto 14px;position:relative;
+}
+.score-ring svg{transform:rotate(-90deg);}
+.score-num{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.score-num .big{font-family:var(--serif);font-weight:900;font-size:2.2rem;color:var(--ink);}
+.score-num .small{font-size:.78rem;color:var(--gray);}
+.grade-msg{font-family:var(--serif);font-weight:700;font-size:1.1rem;color:var(--ink);margin-bottom:18px;}
+.cat-table{
+  width:100%;border-collapse:collapse;font-size:.88rem;margin:10px 0 20px;
+}
+.cat-table th,.cat-table td{
+  padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;
+}
+.cat-table th{color:var(--gray);font-weight:500;font-size:.8rem;}
+.cat-table td:last-child,.cat-table th:last-child{text-align:right;}
+.review-title{
+  font-family:var(--serif);font-weight:700;text-align:left;
+  margin:22px 0 10px;color:var(--ink);font-size:1.02rem;
+}
+.review-item{
+  text-align:left;background:#FBFCFD;border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;margin-bottom:10px;font-size:.88rem;
+}
+.review-item .rq{color:var(--gray);margin-bottom:4px;}
+.review-item .ra{color:var(--ok);font-weight:700;}
+.hidden{display:none;}
+footer{
+  text-align:center;margin-top:34px;color:var(--gray);font-size:.78rem;letter-spacing:.05em;
+}
+@media (max-width:520px){
+  h1{font-size:1.35rem;}
+  .q-card{padding:20px 16px;}
+  .life-q{font-size:1.05rem;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">研究方法基礎訓練</div>
+  <h1>疑問轉譯訓練場</h1>
+  <div class="subtitle">生活疑問 → 可以用資料回答的研究問題｜三選一 × 50 題</div>
+  <div class="progress-shell" id="progressShell" style="display:none;">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-meta" id="progressMeta" style="display:none;">
+    <span id="qCount"></span><span id="scoreLive"></span>
+  </div>
+</header>
+
+<!-- 起始畫面 -->
+<section class="intro-card" id="introCard">
+  <h2>訓練目標</h2>
+  <p>日常生活中的疑問（「為什麼圖書館都沒位子？」）通常<strong>不能直接研究</strong>。要成為研究問題，必須經過「轉譯」——每一題會給你一個生活疑問，以及三個候選版本，請選出<strong>真正可以用資料回答</strong>的那一個。</p>
+
+  <div class="criteria">
+    <strong>好的研究問題四要素：</strong><br>
+    ① 有明確的<strong>研究對象</strong>（誰？哪個群體？）<br>
+    ② 有可觀察、可測量的<strong>變項</strong>（時數、分數、比例、次數…）<br>
+    ③ 問的是變項之間的<strong>關係或差異</strong>，而非好壞對錯<br>
+    ④ 資料<strong>取得可行</strong>（問卷、紀錄、實驗、既有統計）
+  </div>
+
+  <div class="trap">
+    <strong>三種常見陷阱（錯誤選項的原型）：</strong><br>
+    ✘ <strong>價值判斷／應然問題</strong>：「該不該」「對不對」「值不值得」——資料無法回答應然<br>
+    ✘ <strong>模糊不可測</strong>：「是不是很混」「有沒有靈魂」——關鍵詞無法操作化<br>
+    ✘ <strong>預設立場／範圍過大</strong>：「是不是毀了這一代」——問題裡已藏答案，或大到無法蒐集資料
+  </div>
+
+  <div class="cat-legend">
+    <span class="cat-chip">學｜學校 12 題</span>
+    <span class="cat-chip">職｜職場 12 題</span>
+    <span class="cat-chip">家｜家庭 10 題</span>
+    <span class="cat-chip">消｜消費生活 8 題</span>
+    <span class="cat-chip">康｜健康休閒 8 題</span>
+  </div>
+
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn" onclick="startQuiz()">開始訓練</button>
+  </div>
+</section>
+
+<!-- 題目畫面 -->
+<section class="q-card hidden" id="quizCard">
+  <div class="q-head">
+    <div class="seal-stamp" id="sealStamp">學</div>
+    <div>
+      <div class="q-label">生活疑問</div>
+      <div class="life-q" id="lifeQ"></div>
+    </div>
+  </div>
+  <div class="translate-hint">↓ 哪一個才是「可以用資料回答」的研究問題？</div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback">
+    <div class="verdict" id="verdict"></div>
+    <div class="why" id="whyOk"></div>
+    <div class="why" id="whyNo"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">下一題 →</button>
+  </div>
+</section>
+
+<!-- 結果畫面 -->
+<section class="result-card hidden" id="resultCard">
+  <div class="kicker" style="text-align:center;">訓練結果</div>
+  <div class="score-ring">
+    <svg width="150" height="150" viewBox="0 0 150 150">
+      <circle cx="75" cy="75" r="64" fill="none" stroke="#E1E7EC" stroke-width="12"/>
+      <circle id="ringFg" cx="75" cy="75" r="64" fill="none" stroke="var(--ink)" stroke-width="12"
+        stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+    </svg>
+    <div class="score-num">
+      <div class="big" id="finalScore">0</div>
+      <div class="small">／50 題</div>
+    </div>
+  </div>
+  <div class="grade-msg" id="gradeMsg"></div>
+  <table class="cat-table" id="catTable"></table>
+  <div id="reviewBlock"></div>
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn ghost" onclick="location.reload()">重新訓練</button>
+  </div>
+</section>
+
+<footer>疑問轉譯訓練場｜研究方法自學教材</footer>
+</div>
+
+<script>
+/* ============================================================
+   題庫格式：
+   cat  : 分類（學/職/家/消/康）
+   life : 生活疑問
+   opts : 三個選項，opts[0] 恆為正確答案（顯示時隨機洗牌）
+   ok   : 正確選項好在哪
+   no   : 另外兩個選項的問題
+============================================================ */
+const BANK = [
+/* ================= 學校 12 ================= */
+{cat:"學",life:"為什麼我上課都聽不懂統計？",
+opts:["本系二年級學生每週課後複習統計的時數，與期中考成績之間是否有正相關？",
+"統計老師到底教得好不好？",
+"學不會統計是不是因為我天生沒有數學細胞？"],
+ok:"對象明確（本系二年級學生）、變項可測（複習時數、考試成績），問的是兩者的關係，資料可用問卷加成績紀錄取得。",
+no:"「教得好不好」缺乏測量標準且是評價；「天生沒有數學細胞」無法用資料驗證，也把原因預設在自己身上。"},
+
+{cat:"學",life:"圖書館為什麼總是沒位子？",
+opts:["期中考前兩週與平常週相比，圖書館各時段的座位使用率有何差異？",
+"學校是不是應該再蓋一棟新圖書館？",
+"圖書館的位子是不是永遠都不夠用？"],
+ok:"以「時段 × 使用率」把疑問操作化，資料可由現場計數或入館刷卡紀錄取得，還能比較考期與平常的差異。",
+no:"「該不該蓋」是政策應然問題，資料只能提供參考、無法直接回答；「永遠都不夠」是絕對化的模糊陳述，無法檢驗。"},
+
+{cat:"學",life:"同學都用 AI 寫作業，這樣真的好嗎？",
+opts:["使用生成式 AI 輔助寫作的學生與未使用者，其報告成績與文獻引用完整度是否有差異？",
+"用 AI 寫作業到底算不算作弊？",
+"AI 會不會毀了整個教育體系？"],
+ok:"把「好不好」轉成可比較的結果變項（成績、引用完整度），兩組對照，資料可收。",
+no:"「算不算作弊」是規範認定問題，取決於校規而非資料；「毀了教育體系」範圍過大且帶有預設立場，無從測量。"},
+
+{cat:"學",life:"為什麼早八的課大家都遲到？",
+opts:["同一位教師開設的 8 點課程與 10 點課程，學生平均遲到率是否有顯著差異？",
+"現在的學生是不是越來越懶散了？",
+"學校該不該廢除早八制度？"],
+ok:"控制了教師因素，只比較上課時段對遲到率的影響，點名紀錄就是現成資料。",
+no:"「越來越懶散」是貼標籤式的模糊評價；「該不該廢除」是制度應然問題，不是資料能直接回答的。"},
+
+{cat:"學",life:"分組報告怎麼每次都有人搭便車？",
+opts:["小組規模（3 人組 vs 6 人組）與成員互評貢獻分數的離散程度是否有關聯？",
+"愛搭便車的同學是不是人品有問題？",
+"分組報告這種制度是不是本來就很不公平？"],
+ok:"用「組員互評分數的離散程度」測量搭便車現象，比較不同組規模，是社會惰化理論的經典可檢驗設計。",
+no:"「人品有問題」是人身評價，無法操作化；「制度不公平」是價值判斷，公平的標準因人而異。"},
+
+{cat:"學",life:"考前熬夜臨時抱佛腳到底有沒有用？",
+opts:["學生考前一晚的睡眠時數與隔日考試成績之間呈現什麼樣的關係？",
+"熬夜讀書是不是很傷身體的壞習慣？",
+"臨時抱佛腳這種讀書態度值不值得鼓勵？"],
+ok:"睡眠時數與考試成績都是可測量變項，可用自我紀錄加成績資料檢驗其相關。",
+no:"「壞習慣」與「值不值得鼓勵」都是評價與應然問題；前者還把「傷身」說得太籠統，未指明測什麼。"},
+
+{cat:"學",life:"玩社團會不會害我被當？",
+opts:["在控制打工時數後，每週社團參與時數與學期 GPA 之間是否有負相關？",
+"大學生活到底應該以課業還是社團為重？",
+"玩社團是不是在浪費爸媽的學費？"],
+ok:"變項明確（社團時數、GPA），還控制了打工這個干擾變項，設計嚴謹、資料可得。",
+no:"「應該以什麼為重」是人生價值選擇；「浪費學費」是帶情緒的價值判斷，兩者都不是資料問題。"},
+
+{cat:"學",life:"線上課程學起來感覺特別沒效果？",
+opts:["同一門課的線上班與實體班學生，期末成績與完課率是否有顯著差異？",
+"線上上課的學生是不是都在掛網摸魚？",
+"沒有面對面互動的課程是不是少了靈魂？"],
+ok:"同一門課的兩種授課形式對照，結果變項（成績、完課率）客觀可取，是準實驗設計的好題目。",
+no:"「掛網摸魚」預設了立場且難以直接觀測全體；「少了靈魂」完全無法操作化，屬於感受性修辭。"},
+
+{cat:"學",life:"為什麼有人筆記做超漂亮，成績卻很普通？",
+opts:["採用抄寫式、摘要式、概念圖三種筆記策略的學生，一週後的內容保留測驗成績是否有差異？",
+"做漂亮筆記是不是只是在求心安？",
+"為什麼努力跟成績總是不成正比？"],
+ok:"把「筆記」分成三種可辨識的策略類型，用延宕測驗測保留率，可用小型實驗取得資料。",
+no:"「求心安」是對動機的臆測，無法檢驗；「努力跟成績不成正比」中的「努力」未定義，且「總是」過度概括。"},
+
+{cat:"學",life:"打工會不會影響課業？",
+opts:["每週打工 20 小時以上與未滿 20 小時的學生，學期 GPA 是否有顯著差異？",
+"學生時期到底該不該去打工？",
+"打工學到的東西是不是比課堂上多？"],
+ok:"以 20 小時為門檻分組比較 GPA，變項與對象都明確，問卷加成績即可檢驗。",
+no:"「該不該打工」是應然問題；「學到的東西比較多」中的「東西」無法界定與測量，比較基準也不明。"},
+
+{cat:"學",life:"我每天背單字，英文怎麼還是沒進步？",
+opts:["每日背 20 個與每日背 50 個單字的兩組學生，四週後的單字測驗成績是否有差異？",
+"我是不是根本沒有學語言的天分？",
+"背單字這種土法煉鋼到底有沒有意義？"],
+ok:"操弄「每日背誦量」、測量「四週後測驗成績」，是可以實際執行的小型實驗設計。",
+no:"「沒有天分」無法驗證且預設歸因於自身；「有沒有意義」是價值提問，『意義』無法測量。"},
+
+{cat:"學",life:"老師點名，大家就會乖乖來上課嗎？",
+opts:["有點名制度與無點名制度的通識課程，學生平均出席率是否有顯著差異？",
+"大學生翹課是不是天經地義的事？",
+"用點名逼學生來上課是不是不尊重大學生？"],
+ok:"點名制度有無是清楚的分組條件，出席率是客觀紀錄，兩相比較即可回答。",
+no:"「天經地義」是價值合理化的說法；「不尊重」是價值評價，兩者都不是資料可以裁決的問題。"},
+
+/* ================= 職場 12 ================= */
+{cat:"職",life:"會怎麼開不完？正事都沒時間做！",
+opts:["員工每週會議總時數與其自評任務準時完成率之間是否有負相關？",
+"主管是不是特別喜歡用開會刷存在感？",
+"開會是不是都在浪費大家的生命？"],
+ok:"會議時數可由行事曆統計、完成率可由自評或專案系統取得，兩變項的關係可以檢驗。",
+no:"「刷存在感」是對動機的揣測，無法測量；「浪費生命」是情緒性修辭，浪費與否無客觀標準。"},
+
+{cat:"職",life:"在家工作到底有沒有比較有效率？",
+opts:["同一批員工在遠距日與進辦公室日的工單處理量是否有顯著差異？",
+"在家上班的人是不是都在偷懶？",
+"公司應不應該全面改成遠距工作？"],
+ok:"同一批人自身對照，排除個人能力差異，工單處理量是客觀產出指標。",
+no:"「都在偷懶」預設立場且以偏概全；「應不應該全面遠距」是管理決策的應然問題，資料只能輔助。"},
+
+{cat:"職",life:"為什麼新人待不到半年就走光了？",
+opts:["到職前三個月有無配置導師（mentor）的新進員工，一年內留任率是否有差異？",
+"現在的年輕人是不是抗壓性太差？",
+"我們公司是不是一間血汗企業？"],
+ok:"導師制度有無是明確的分組條件，留任率可由人事紀錄計算，能直接檢驗制度效果。",
+no:"「抗壓性太差」是世代標籤，未定義也難測量；「血汗企業」是評價性認定，缺乏可檢驗的操作標準。"},
+
+{cat:"職",life:"每天加班，我快撐不下去了。",
+opts:["員工每月加班時數與離職意願量表得分之間是否有正相關？",
+"加班文化是不是一種職場病態？",
+"努力工作難道有錯嗎？"],
+ok:"加班時數有出勤紀錄、離職意願有成熟量表可用，兩者的相關可以實際檢驗。",
+no:"「病態」是價值標籤，無診斷標準；「有錯嗎」是反問式的價值申辯，不是可回答的問題。"},
+
+{cat:"職",life:"薪水高的人真的比較快樂嗎？",
+opts:["在控制年資後，員工月薪級距與工作滿意度量表分數之間是否有關聯？",
+"錢到底能不能買到快樂？",
+"老闆是不是應該幫大家加薪？"],
+ok:"把「快樂」操作化為工作滿意度量表分數，並控制年資干擾，是標準的調查研究設計。",
+no:"「錢能不能買到快樂」中的快樂未操作化、範圍無限大；「該不該加薪」是應然主張。"},
+
+{cat:"職",life:"聽說站著辦公對身體比較好？",
+opts:["使用站立式辦公桌八週的員工與對照組相比，自評腰背痠痛頻率的變化是否有差異？",
+"站著工作是不是真的比較健康？",
+"久坐是不是新型態的吸菸？"],
+ok:"有介入（站立桌）、有期間（八週）、有對照組、有明確測量（痠痛頻率），是完整的實驗設計。",
+no:"「比較健康」的『健康』未指明測什麼，無法操作化；「新型態的吸菸」是媒體式比喻，不是研究問題。"},
+
+{cat:"職",life:"公司導入業績獎金，真的有用嗎？",
+opts:["導入業績獎金制度前後六個月，業務部門人均銷售額是否有顯著變化？",
+"用錢來激勵員工到底對不對？",
+"業務同仁是不是只有錢才叫得動？"],
+ok:"制度導入前後對照，人均銷售額是現成的客觀資料，可直接評估制度效果。",
+no:"「對不對」是倫理應然問題；「只有錢才叫得動」預設了對員工的負面立場，且無法測量。"},
+
+{cat:"職",life:"用 email 交辦事情，常常石沉大海。",
+opts:["以 email 與以即時通訊軟體指派任務時，平均回覆時間與任務錯誤率是否有差異？",
+"已讀不回是不是很沒有職場倫理？",
+"我們公司的內部溝通是不是爛到骨子裡？"],
+ok:"比較兩種溝通管道的回覆時間與錯誤率，變項客觀、可由系統紀錄取得。",
+no:"「沒有職場倫理」是道德評價；「爛到骨子裡」是情緒化的整體貶抑，無法界定與檢驗。"},
+
+{cat:"職",life:"面試時「看人的感覺」到底準不準？",
+opts:["面試官的直覺評分與新進人員一年後績效考核成績之間的相關程度為何？",
+"看人準不準是不是一種與生俱來的天分？",
+"面試是不是就是一場你演我猜的戲？"],
+ok:"直覺評分與後續績效都有紀錄可查，兩者相關程度正是「準不準」的可檢驗版本。",
+no:"「與生俱來的天分」無法驗證；「你演我猜的戲」是譏諷式比喻，不構成研究問題。"},
+
+{cat:"職",life:"每年花大錢辦教育訓練，真的有效嗎？",
+opts:["參與客服訓練課程與未參與的員工，三個月後的客訴率與服務品質評分是否有差異？",
+"教育訓練是不是都只是做給老闆看的？",
+"員工到底有沒有心要學習？"],
+ok:"以客訴率與服務評分作為訓練成效指標，兩組對照，三個月的追蹤期設計合理。",
+no:"「做給老闆看」是對動機的指控，無法測量；「有沒有心」的『心』完全無法操作化。"},
+
+{cat:"職",life:"每天通勤兩小時，感覺整個人被掏空。",
+opts:["員工單程通勤時間與工作倦怠量表分數之間是否有正相關？",
+"通勤是不是人生最大的浪費？",
+"住在公司附近是不是比較好？"],
+ok:"通勤時間客觀可測，倦怠有標準化量表，兩者關係可以用問卷調查回答。",
+no:"「人生最大的浪費」是誇飾的價值陳述；「是不是比較好」的『好』沒有定義，比較什麼並不清楚。"},
+
+{cat:"職",life:"週五下午大家是不是都無心工作了？",
+opts:["客服部門週一至週五各日下午時段的案件結案數是否有顯著差異？",
+"週五下午還在認真工作的人是不是傻子？",
+"公司該不該乾脆改成週休三日？"],
+ok:"用各日下午的結案數比較，把「無心工作」轉成可觀察的產出差異，系統紀錄即是資料。",
+no:"「是不是傻子」是嘲諷式價值評斷；「該不該週休三日」是制度應然問題，需要的不只是資料。"},
+
+/* ================= 家庭 10 ================= */
+{cat:"家",life:"小孩整天滑手機，成績會不會完蛋？",
+opts:["國中生每日螢幕使用時數與其段考成績、睡眠時數之間呈現什麼關係？",
+"智慧型手機是不是毀了這一代的孩子？",
+"父母該不該直接沒收小孩的手機？"],
+ok:"對象（國中生）與變項（螢幕時數、成績、睡眠）都明確，可用問卷或裝置紀錄蒐集。",
+no:"「毀了這一代」預設結論且範圍過大；「該不該沒收」是教養決策的應然問題。"},
+
+{cat:"家",life:"爸媽年紀大了，記憶力好像越來越差。",
+opts:["長者每週參與社區活動的次數與其簡易認知量表（MMSE）分數變化是否有關聯？",
+"人老了是不是一定會失智？",
+"沒時間多陪爸媽，我是不是很不孝？"],
+ok:"社區活動次數與認知量表分數都是可測量變項，可以透過長期追蹤回答。",
+no:"「一定會失智」是絕對化命題，一個反例即破，不是好的提問方式；「是不是不孝」是道德自責，非資料問題。"},
+
+{cat:"家",life:"家事都是我在做，另一半都不動手！",
+opts:["雙薪家庭中夫妻每週家務時數的差距與婚姻滿意度之間是否有關聯？",
+"男人是不是天生就不會做家事？",
+"家事到底要怎麼分才算公平？"],
+ok:"把不滿轉成「家務時數差距 × 婚姻滿意度」的關係問題，兩者都可以用問卷測量。",
+no:"「天生不會做家事」是性別刻板印象且無法驗證『天生』；「怎麼分才公平」是價值協商問題，公平無統一標準。"},
+
+{cat:"家",life:"全家一起吃晚餐，真的那麼重要嗎？",
+opts:["家庭每週共進晚餐的次數與青少年子女自評親子關係量表分數之間是否有關聯？",
+"現代家庭是不是越來越疏離了？",
+"忙到沒時間陪家人吃飯，到底是誰的錯？"],
+ok:"共餐次數可自我記錄、親子關係有量表可測，「重要嗎」被轉譯成可檢驗的關聯。",
+no:"「越來越疏離」的『疏離』未定義、時間範圍不明；「誰的錯」是究責式提問，不是研究問題。"},
+
+{cat:"家",life:"到底要不要送小孩去補習？",
+opts:["在控制原始成績後，有補習與未補習的學生，段考成績進步幅度是否有差異？",
+"補習班是不是都在販賣家長的焦慮？",
+"不補習的話，孩子會不會輸在起跑點？"],
+ok:"控制了原始成績（避免補習者本來就強或弱的干擾），比較進步幅度，設計有到位。",
+no:"「販賣焦慮」是對產業動機的評價；「輸在起跑點」的起跑點與輸贏都無法定義，只是焦慮的修辭。"},
+
+{cat:"家",life:"爸爸一天到晚坐在電視前，這樣好嗎？",
+opts:["長者每日看電視時數與其夜間睡眠品質自評分數之間是否有關聯？",
+"電視是不是變成了老人家的保母？",
+"該不該限制長輩看政論節目的時間？"],
+ok:"看電視時數與睡眠品質量表都可測量，把「這樣好嗎」轉成具體的健康關聯問題。",
+no:"「老人家的保母」是比喻，無法檢驗；「該不該限制」是家庭決策的應然問題。"},
+
+{cat:"家",life:"養了貓之後，感覺心情真的變好了？",
+opts:["同年齡層中，有飼養寵物與未飼養者的孤獨感量表分數是否有差異？",
+"養貓的人是不是其實比較孤僻？",
+"毛小孩算不算真正的家人？"],
+ok:"控制年齡層、用孤獨感量表比較兩組，把主觀感受轉成可測量的心理指標。",
+no:"「比較孤僻」是刻板印象式標籤且因果方向混亂；「算不算家人」是定義與情感認同問題，不是資料問題。"},
+
+{cat:"家",life:"零用錢是要固定給，還是做家事才給？",
+opts:["採定額零用錢與採勞務交換零用錢的兩組兒童，其每月儲蓄比例是否有差異？",
+"用錢獎勵小孩做家事，會不會寵壞他？",
+"現在的小孩到底懂不懂金錢的價值？"],
+ok:"兩種制度是明確的分組條件，儲蓄比例是可記錄的行為指標，家庭內即可觀察。",
+no:"「寵壞」缺乏操作定義，何謂寵壞人人不同；「懂不懂金錢的價值」的『懂』無法直接測量，提問也過於籠統。"},
+
+{cat:"家",life:"跟公婆住在一起，壓力真的比較大嗎？",
+opts:["三代同堂與核心家庭中的主要照顧者，其照顧者壓力量表分數是否有差異？",
+"婆媳問題是不是千古無解的難題？",
+"跟公婆同住是不是一定會吵架？"],
+ok:"居住型態是清楚的分組變項，照顧者壓力有標準化量表，兩組比較即可回答。",
+no:"「千古無解」是宿命式斷言，無法檢驗；「一定會吵架」是絕對化命題，且『吵架』的認定標準模糊。"},
+
+{cat:"家",life:"家族群組每天被長輩圖和轉傳訊息洗版。",
+opts:["50 歲以上的通訊軟體使用者，每日轉傳訊息則數與其查證行為（轉傳前有無查證）之間是否有關聯？",
+"長輩是不是特別容易被假訊息騙？",
+"假訊息是不是根本防不勝防？"],
+ok:"對象、行為（轉傳則數）、查證行為都可以透過問卷或觀察取得，是媒體素養研究的具體切入。",
+no:"「特別容易被騙」缺少比較基準（跟誰比？）且帶年齡偏見；「防不勝防」是無力感的抒發，非可檢驗命題。"},
+
+/* ================= 消費生活 8 ================= */
+{cat:"消",life:"排兩小時隊吃的名店，真的比較好吃嗎？",
+opts:["顧客排隊等候時間的長短與其用餐後滿意度評分之間是否有關聯？",
+"會排隊的名店是不是都在搞飢餓行銷？",
+"花兩小時排隊吃一碗麵，到底值不值得？"],
+ok:"等候時間與餐後滿意度都可在現場蒐集，還能檢驗「等越久評價越高」的認知失調假設。",
+no:"「飢餓行銷」是對店家動機的指控，難以直接驗證；「值不值得」是個人價值權衡，因人而異。"},
+
+{cat:"消",life:"超商咖啡寄杯優惠，是不是讓我越買越多？",
+opts:["推出寄杯優惠的檔期與無優惠檔期相比，單店咖啡銷售杯數是否有顯著差異？",
+"寄杯制度是不是讓人不知不覺花更多錢的陷阱？",
+"台灣人是不是太愛喝咖啡了？"],
+ok:"檔期前後的銷售杯數是現成的營運資料，直接檢驗優惠對銷量的效果。",
+no:"「陷阱」預設了負面結論；「太愛喝咖啡」的『太』沒有標準，是感嘆不是問題。"},
+
+{cat:"消",life:"網購前看評論，到底能不能信？",
+opts:["電商平台上商品的平均評論星等與其退貨率之間是否有相關？",
+"網路評論是不是一半以上都是假的？",
+"會寫負評的人是不是特別憤世嫉俗？"],
+ok:"星等與退貨率都是平台可取得的客觀資料，若高星等商品退貨率也高，就是評論可信度的具體證據。",
+no:"「一半以上都是假的」看似具體，但『假』的認定無操作標準、母體也無從界定；「憤世嫉俗」是對人的貼標。"},
+
+{cat:"消",life:"外送平台的免運門檻，害我每次都多點！",
+opts:["免運門檻設為 199 元與 299 元時，訂單平均客單價是否有顯著差異？",
+"外送平台是不是把現代人養得越來越懶？",
+"平台抽成這麼高，到底合不合理？"],
+ok:"門檻是可操弄（或可觀察）的條件，客單價是客觀結果，是價格心理學的可檢驗題目。",
+no:"「養得越來越懶」的『懶』無法測量且預設因果；「合不合理」是價值與利益立場問題。"},
+
+{cat:"消",life:"百貨週年慶，大家真的有買到便宜嗎？",
+opts:["週年慶檔期與非檔期相比，顧客單筆消費金額與退貨率是否有差異？",
+"週年慶的折扣是不是都是先漲再打折的假優惠？",
+"女人是不是天生就愛血拚？"],
+ok:"檔期與非檔期的消費金額、退貨率都有交易紀錄可查，能刻畫促銷期的實際消費行為。",
+no:"「假優惠」的指控其實可以查價驗證，但此選項寫成「都是」的全稱斷言，一筆真折扣即推翻；「天生愛血拚」是性別刻板印象。"},
+
+{cat:"消",life:"訂了一堆串流平台，好像根本沒在看？",
+opts:["訂閱影音平台的使用者中，連續三個月未使用仍持續扣款者的比例為何？其與是否設定自動續訂有無關聯？",
+"訂閱制是不是專門在賺懶得取消的人的錢？",
+"我是不是一個很浪費錢的人？"],
+ok:"未使用卻續訂的比例、自動續訂設定，都是可由問卷或平台資料取得的具體指標。",
+no:"「專門賺懶人錢」是對商業模式的動機指控；「我是不是很浪費」是自我評價，樣本只有一人也無標準。"},
+
+{cat:"消",life:"貼上「有機」標籤的菜，就是賣得比較貴。",
+opts:["同一批蔬菜在標示「有機」與未標示的情況下，消費者的願付價格是否有差異？",
+"有機食品是不是一種智商稅？",
+"吃有機的人是不是真的比較養生？"],
+ok:"同一商品、僅操弄標籤，測量願付價格差異，是乾淨的實驗設計，直接回答標籤的溢價效果。",
+no:"「智商稅」是嘲諷性評價；「比較養生」的『養生』未定義，且吃有機與其他健康行為糾纏、因果不明。"},
+
+{cat:"消",life:"觀光夜市是不是都在賺觀光客的錢？",
+opts:["觀光型夜市與在地型夜市的攤商相比，同類品項平均單價與顧客回訪率是否有差異？",
+"夜市的東西是不是越來越貴又越來越難吃？",
+"傳統夜市文化會不會有一天徹底消失？"],
+ok:"選定同類品項比較兩類夜市的單價與回訪率，實地調查即可蒐集，具體可行。",
+no:"「越來越貴又難吃」混雜兩個模糊評價且無時間基準；「會不會消失」是對遙遠未來的猜測，無法用現有資料回答。"},
+
+/* ================= 健康休閒 8 ================= */
+{cat:"康",life:"睡前滑手機，是不是害我都睡不著？",
+opts:["同一批受試者在睡前 30 分鐘使用手機與不使用的兩種情境下，自我記錄的入睡所需時間是否有差異？",
+"手機藍光是不是很傷身體？",
+"我是不是已經手機成癮了？"],
+ok:"自身前後對照、行為條件明確（睡前 30 分鐘）、結果可記錄（入睡時間），兩週日誌即可完成。",
+no:"「很傷身體」的『傷』與『身體』都太籠統，未指明測量什麼；「手機成癮」是診斷式自問，需要臨床標準而非一句疑問。"},
+
+{cat:"康",life:"大家都說運動可以紓壓，是真的嗎？",
+opts:["上班族每週運動次數與其自評壓力指數之間是否有負相關？",
+"運動是不是治百病的萬靈丹？",
+"說自己沒時間運動的人，是不是都在找藉口？"],
+ok:"對象（上班族）、變項（運動次數、壓力指數）明確，用問卷即可檢驗兩者關係。",
+no:"「萬靈丹」是誇飾的全稱宣稱，無法檢驗所有病症；「找藉口」是對他人動機的評斷。"},
+
+{cat:"康",life:"這幾年爬山的人好像變超多？",
+opts:["近五年國家公園登山入園申請人次的變化趨勢為何？其與山域事故件數之間是否同步變化？",
+"大家是不是只是一窩蜂跟風爬山？",
+"新手貿然爬山是不是很危險？"],
+ok:"入園申請與山域事故都有官方統計，趨勢與關聯都能直接以既有資料分析。",
+no:"「一窩蜂跟風」是對動機的貶抑猜測；「很危險」的『很』沒有比較基準，危險程度需要事故率資料，但此問法無法操作。"},
+
+{cat:"康",life:"一天到底要不要喝滿八杯水？",
+opts:["成年人連續四週記錄的每日飲水量與其自評疲勞程度之間是否有關聯？",
+"水喝不夠是不是百病之源？",
+"不愛喝水是不是一種壞習慣？"],
+ok:"飲水量與疲勞程度都可自我記錄，四週的資料足以檢驗兩者關聯。",
+no:"「百病之源」是誇大的全稱因果宣稱；「壞習慣」是價值標籤，好壞的標準並不存在於資料中。"},
+
+{cat:"康",life:"忙到沒時間休閒，人生好像只剩工作。",
+opts:["在控制收入水準後，成年人每週休閒活動時數與幸福感量表分數之間是否有關聯？",
+"人生是不是就應該及時行樂？",
+"整天忙工作的人是不是都不懂生活？"],
+ok:"休閒時數與幸福感量表皆可測量，控制收入排除「有錢才有閒」的干擾，設計完整。",
+no:"「及時行樂」是人生哲學的應然主張；「不懂生活」是對他人的價值評斷，『懂生活』無法定義。"},
+
+{cat:"康",life:"跟貓玩一玩，煩躁的心情好像就平靜了？",
+opts:["受試者與寵物互動 15 分鐘前後，其心率與自評焦慮分數是否有顯著變化？",
+"貓咪是不是天生就有療癒人心的魔力？",
+"養貓好還是養狗好？"],
+ok:"前後測設計、介入明確（互動 15 分鐘）、指標客觀（心率）加主觀（焦慮量表），可實際執行。",
+no:"「療癒魔力」是浪漫化修辭，『魔力』無法測量；「養貓好還是養狗好」的『好』沒有定義，是偏好之爭。"},
+
+{cat:"康",life:"手環一直提醒我一天要走一萬步。",
+opts:["每日步數達一萬步與未達五千步的成年人，三個月後的體重與體脂變化是否有差異？",
+"一萬步是不是根本只是廠商的行銷話術？",
+"我是不是真的太懶得動了？"],
+ok:"步數由穿戴裝置客觀記錄，體重體脂可測量，三個月追蹤兩組差異，設計清楚。",
+no:"「行銷話術」考證其歷史起源是另一種研究，但此問法只是質疑式反問，未界定要檢驗什麼；「我是不是太懶」是自我責備，非研究問題。"},
+
+{cat:"康",life:"不喝咖啡就完全無法開始工作！",
+opts:["同一批受試者在飲用咖啡後 30 分鐘與未飲用的情境下，注意力測驗成績是否有差異？",
+"咖啡是不是最強的提神神器？",
+"沒喝咖啡就沒精神，是不是只是心理作用？"],
+ok:"自身對照設計、時間點明確、以注意力測驗為客觀指標，是可執行的小型實驗。",
+no:"「最強提神神器」的『最強』需要窮盡比較所有提神方式，無法成立；「心理作用」的問法籠統——安慰劑效應可以研究，但需要設計對照，此句只是感嘆式反問。"}
+];
+
+/* ============================================================ 狀態 */
+let order=[], idx=0, score=0, answered=false;
+let catStat={}, wrongList=[];
+const CAT_NAME={"學":"學校","職":"職場","家":"家庭","消":"消費生活","康":"健康休閒"};
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  order=shuffle([...Array(BANK.length).keys()]);
+  idx=0;score=0;catStat={};wrongList=[];
+  document.getElementById("introCard").classList.add("hidden");
+  document.getElementById("quizCard").classList.remove("hidden");
+  document.getElementById("progressShell").style.display="block";
+  document.getElementById("progressMeta").style.display="flex";
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;
+  const q=BANK[order[idx]];
+  document.getElementById("sealStamp").textContent=q.cat;
+  document.getElementById("lifeQ").textContent="「"+q.life+"」";
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("nextBtn").classList.add("hidden");
+
+  // 洗牌選項，記住正確答案位置
+  const opts=q.opts.map((t,i)=>({t,correct:i===0}));
+  shuffle(opts);
+  const box=document.getElementById("options");
+  box.innerHTML="";
+  const tags=["甲","乙","丙"];
+  opts.forEach((o,i)=>{
+    const btn=document.createElement("button");
+    btn.className="opt";
+    btn.dataset.correct=o.correct?"1":"0";
+    btn.innerHTML='<span class="tag">'+tags[i]+'</span>'+o.t;
+    btn.onclick=()=>choose(btn,o.correct,q);
+    box.appendChild(btn);
+  });
+
+  document.getElementById("qCount").textContent="第 "+(idx+1)+" 題／共 "+BANK.length+" 題";
+  document.getElementById("scoreLive").textContent="目前答對 "+score+" 題";
+  document.getElementById("progressBar").style.width=(idx/BANK.length*100)+"%";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function choose(btn,isCorrect,q){
+  if(answered)return;
+  answered=true;
+  const all=document.querySelectorAll(".opt");
+  all.forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.correct==="1"){b.classList.add("correct");}
+    else if(b!==btn){b.classList.add("dim");}
+  });
+  if(!isCorrect)btn.classList.add("wrong");
+
+  if(!catStat[q.cat])catStat[q.cat]={ok:0,total:0};
+  catStat[q.cat].total++;
+  if(isCorrect){score++;catStat[q.cat].ok++;}
+  else{wrongList.push(q);}
+
+  const fb=document.getElementById("feedback");
+  fb.classList.add("show",isCorrect?"good":"bad");
+  document.getElementById("verdict").textContent=isCorrect?"✔ 答對了":"✘ 再想想——正確答案已用綠色標示";
+  document.getElementById("whyOk").innerHTML="<b>為什麼它可以用資料回答：</b>"+q.ok;
+  document.getElementById("whyNo").innerHTML="<b>另外兩個選項的問題：</b>"+q.no;
+  document.getElementById("scoreLive").textContent="目前答對 "+score+" 題";
+  document.getElementById("nextBtn").classList.remove("hidden");
+  document.getElementById("nextBtn").textContent=(idx===BANK.length-1)?"查看結果 →":"下一題 →";
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx>=BANK.length){showResult();return;}
+  renderQuestion();
+}
+
+function showResult(){
+  document.getElementById("quizCard").classList.add("hidden");
+  document.getElementById("resultCard").classList.remove("hidden");
+  document.getElementById("progressBar").style.width="100%";
+  document.getElementById("qCount").textContent="訓練完成";
+  document.getElementById("scoreLive").textContent="答對 "+score+"／"+BANK.length+" 題";
+
+  document.getElementById("finalScore").textContent=score;
+  const ring=document.getElementById("ringFg");
+  requestAnimationFrame(()=>{ring.style.transition="stroke-dashoffset 1s ease";
+    ring.style.strokeDashoffset=402*(1-score/BANK.length);});
+
+  let msg;
+  const r=score/BANK.length;
+  if(r>=0.9)msg="轉譯功力已然到位——你已經能穩定分辨『可以用資料回答』的問題了。";
+  else if(r>=0.75)msg="判準大致掌握，錯的題目多半卡在模糊詞的辨識，回頭看解析。";
+  else if(r>=0.5)msg="已有基本手感。特別留意「該不該」「值不值得」這類應然陷阱。";
+  else msg="別氣餒——先回到四要素：對象、變項、關係、可行性，逐題重練。";
+  document.getElementById("gradeMsg").textContent=msg;
+
+  let rows="<tr><th>領域</th><th>答對率</th></tr>";
+  Object.keys(CAT_NAME).forEach(c=>{
+    if(catStat[c]){
+      rows+="<tr><td>"+CAT_NAME[c]+"</td><td>"+catStat[c].ok+"／"+catStat[c].total+
+      "（"+Math.round(catStat[c].ok/catStat[c].total*100)+"%）</td></tr>";
+    }
+  });
+  document.getElementById("catTable").innerHTML=rows;
+
+  const rb=document.getElementById("reviewBlock");
+  if(wrongList.length===0){
+    rb.innerHTML='<div class="review-title">全對！沒有需要複習的題目。</div>';
+  }else{
+    let html='<div class="review-title">答錯題目複習（'+wrongList.length+' 題）</div>';
+    wrongList.forEach(q=>{
+      html+='<div class="review-item"><div class="rq">「'+q.life+'」</div>'+
+      '<div class="ra">✔ '+q.opts[0]+'</div></div>';
+    });
+    rb.innerHTML=html;
+  }
+}
+</script>
+</body>
+</html>
